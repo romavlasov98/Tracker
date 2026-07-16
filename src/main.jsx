@@ -144,22 +144,8 @@ function App() {
           <button className="theme-toggle" onClick={() => setDark(!dark)} aria-label="Сменить тему"><Icon name={dark ? 'sun' : 'moon'} size={19}/></button>
         </header>
 
-        <section className="date-panel">
-          <button className="arrow" onClick={() => changeDay(-1)}><Icon name="chevronLeft"/></button>
-          <div className="week-strip">
-            {week.map((date, index) => {
-              const selected = sameDate(date, selectedDate)
-              return <button key={dateKey(date)} className={selected ? 'selected' : ''} onClick={() => setSelectedDate(date)}>
-                <span>{['Пн','Вт','Ср','Чт','Пт','Сб','Вс'][index]}</span>
-                <strong>{date.getDate()}</strong>
-                {sameDate(date, new Date()) && <i />}
-              </button>
-            })}
-          </div>
-          <button className="arrow" onClick={() => changeDay(1)}><Icon name="chevronRight"/></button>
-        </section>
-
-        {page === 'today' && <TodayPage total={total} goal={data.goal} percent={percent} remaining={remaining} amount={amount} setAmount={setAmount} addWater={addWater} logs={logs} removeLog={removeLog} dayTitle={dayTitle} openGoal={() => setShowGoal(true)} />}
+        {page !== 'today' && <DatePanel week={week} selectedDate={selectedDate} setSelectedDate={setSelectedDate} changeDay={changeDay} />}
+        {page === 'today' && <TodayPage total={total} goal={data.goal} percent={percent} remaining={remaining} amount={amount} setAmount={setAmount} addWater={addWater} logs={logs} removeLog={removeLog} dayTitle={dayTitle} openGoal={() => setShowGoal(true)} calendar={<DatePanel week={week} selectedDate={selectedDate} setSelectedDate={setSelectedDate} changeDay={changeDay} />} />}
         {page === 'stats' && <StatsPage data={data} selectedDate={selectedDate} />}
         {page === 'history' && <HistoryPage data={data} goal={data.goal} />}
       </main>
@@ -170,7 +156,24 @@ function App() {
   )
 }
 
-function TodayPage({ total, goal, percent, remaining, amount, setAmount, addWater, logs, removeLog, dayTitle, openGoal }) {
+function DatePanel({ week, selectedDate, setSelectedDate, changeDay }) {
+  return <section className="date-panel">
+    <button className="arrow" onClick={() => changeDay(-1)}><Icon name="chevronLeft"/></button>
+    <div className="week-strip">
+      {week.map((date, index) => {
+        const selected = sameDate(date, selectedDate)
+        return <button key={dateKey(date)} className={selected ? 'selected' : ''} onClick={() => setSelectedDate(date)}>
+          <span>{['Пн','Вт','Ср','Чт','Пт','Сб','Вс'][index]}</span>
+          <strong>{date.getDate()}</strong>
+          {sameDate(date, new Date()) && <i />}
+        </button>
+      })}
+    </div>
+    <button className="arrow" onClick={() => changeDay(1)}><Icon name="chevronRight"/></button>
+  </section>
+}
+
+function TodayPage({ total, goal, percent, remaining, amount, setAmount, addWater, logs, removeLog, dayTitle, openGoal, calendar }) {
   return <div className="dashboard-grid">
     <section className="card progress-card">
       <div className="card-head"><div><p className="eyebrow">Ваш прогресс</p><h2>{dayTitle}</h2></div><button className="goal-button" onClick={openGoal}><Icon name="target" size={17}/>{(goal / 1000).toFixed(1)} л</button></div>
@@ -189,6 +192,8 @@ function TodayPage({ total, goal, percent, remaining, amount, setAmount, addWate
         </div>
       </div>
     </section>
+
+    {calendar}
 
     <section className="card add-card">
       <div className="card-head"><div><p className="eyebrow">Новая запись</p><h2>Добавить воду</h2></div><span className="glass-icon"><Icon name="glass" size={22}/></span></div>
